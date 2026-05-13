@@ -29,8 +29,8 @@ export class RoleRepository {
 
     const now = new Date();
     await db.insert(role).values([
-      { name: "student", createdAt: now, updatedAt: now },
-      { name: "lecturer", createdAt: now, updatedAt: now },
+      { name: "Mahasiswa", createdAt: now, updatedAt: now },
+      { name: "Dosen", createdAt: now, updatedAt: now },
     ]);
     console.log("Roles seeded successfully");
   }

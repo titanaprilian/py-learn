@@ -20,13 +20,13 @@ export function useAuth() {
         id: session.user.id,
         name: session.user.name,
         email: session.user.email,
-        role: (session.user as SessionUser).role as "student" | "lecturer",
+        role: (session.user as SessionUser).role as "Mahasiswa" | "Dosen",
       }
     : null;
 
   const isAuthenticated = !!session?.user;
-  const isMahasiswa = user?.role === "student";
-  const isDosen = user?.role === "lecturer";
+  const isMahasiswa = user?.role === "Mahasiswa";
+  const isDosen = user?.role === "Dosen";
 
   return {
     user,
@@ -37,3 +37,4 @@ export function useAuth() {
     error,
   };
 }
+
