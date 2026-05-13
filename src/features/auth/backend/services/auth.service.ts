@@ -1,5 +1,6 @@
 import { auth } from "@/features/auth/backend/auth";
 import { AuthRepository } from "@/features/auth/backend/repositories/auth.repository";
+import { RoleRepository } from "@/features/auth/backend/repositories/role.repository";
 import { headers } from "next/headers";
 
 export type AuthResult =
@@ -17,8 +18,12 @@ export class AuthService {
       return null;
     }
 
-    const expectedRole = role === "student" ? "student" : "lecturer";
-    if (dbUser.role !== expectedRole) {
+    const roleRecord = await RoleRepository.findByName(role);
+    if (!roleRecord) {
+      return null;
+    }
+
+    if (dbUser.role !== role) {
       return null;
     }
 
@@ -30,6 +35,11 @@ export class AuthService {
     password: string,
     role: "student" | "lecturer"
   ): Promise<AuthResult> {
+    const roleRecord = await RoleRepository.findByName(role);
+    if (!roleRecord) {
+      return { error: "Invalid role" };
+    }
+
     const dbUser = await AuthRepository.findByIdentifier(identifier);
 
     if (!dbUser) {
@@ -41,8 +51,7 @@ export class AuthService {
 
     console.log(`User found: ${dbUser.email} (Role: ${dbUser.role})`);
 
-    const expectedRole = role === "student" ? "student" : "lecturer";
-    if (dbUser.role !== expectedRole) {
+    if (dbUser.role !== role) {
       console.log(`Role mismatch: Expected ${role}, got ${dbUser.role}`);
       return {
         error: `Akun ini bukan sebagai ${

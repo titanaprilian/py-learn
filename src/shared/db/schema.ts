@@ -9,6 +9,17 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+export const role = pgTable("role", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 20 }).notNull().unique(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const roleRelations = relations(role, ({ many }) => ({
+  users: many(user),
+}));
+
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   userId: varchar("user_id", { length: 30 }).notNull().unique(),
@@ -21,6 +32,13 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
+
+export const userRoleRelations = relations(user, ({ one }) => ({
+  role: one(role, {
+    fields: [user.role],
+    references: [role.name],
+  }),
+}));
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),

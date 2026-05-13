@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "codebase-knowledge-builder": {
+      "source": "OthmanAdi/codebase-knowledge-builder",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-knowledge-builder/SKILL.md",
+      "computedHash": "9437ddcf549efcead11eead55ad361c0d9c12331a09ee75e2a906ec0760795bb"
+    }
+  }
+}

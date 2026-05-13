@@ -24,61 +24,54 @@ PyLearn is a full-stack learning platform designed for Python education. It feat
 The project follows a **Feature-Based Architecture**. Code is organized by domain in `src/features` and shared logic in `src/shared`.
 
 ### Path Aliases
-
 - `@/*` -> `src/*`
 - `@/features/*` -> `src/features/*`
 - `@/shared/*` -> `src/shared/*`
 
 ### Visual Architecture
-
 ```mermaid
 graph TD
     App[src/app/ - Routes & Layouts] --> Actions[src/features/*/backend/actions/ - Server Actions]
     Actions --> Services[src/features/*/backend/services/ - Business Logic]
     Services --> Repositories[src/features/*/backend/repositories/ - Data Access]
     Repositories --> DB[(PostgreSQL + Drizzle)]
-
+    
     App --> Frontend[src/features/*/frontend/ - Components & Hooks]
     Frontend --> Hooks[src/features/*/frontend/hooks/ - TanStack Query]
     Hooks --> Actions
 ```
 
 ### Core Directories
-
 - `src/app/`: Next.js App Router pages and layouts. **Keep logic to a minimum here.**
 - `src/features/`: Domain-specific logic (e.g., `auth`, `materi`, `tugas`).
-  - `backend/`: Server-side logic.
-    - `actions/`: `next-safe-action` entry points.
-    - `services/`: Complex business logic and orchestration.
-    - `repositories/`: Direct database queries using Drizzle.
-    - `validations/`: Zod schemas for this feature.
-  - `frontend/`: Client-side logic.
-    - `components/`: Feature-specific UI.
-    - `hooks/`: Data fetching hooks (TanStack Query).
-    - `providers/`: Context providers for the feature.
-  - `shared/`: Constants and types used by both backend and frontend.
+    - `backend/`: Server-side logic.
+        - `actions/`: `next-safe-action` entry points.
+        - `services/`: Complex business logic and orchestration.
+        - `repositories/`: Direct database queries using Drizzle.
+        - `validations/`: Zod schemas for this feature.
+    - `frontend/`: Client-side logic.
+        - `components/`: Feature-specific UI.
+        - `hooks/`: Data fetching hooks (TanStack Query).
+        - `providers/`: Context providers for the feature.
+    - `shared/`: Constants and types used by both backend and frontend.
 - `src/shared/`: Cross-cutting concerns.
-  - `db/`: Database configuration and canonical schema.
-  - `utils/`: Common utilities (e.g., `cn.ts`).
-  - `components/ui/`: Canonical shadcn/ui components.
+    - `db/`: Database configuration and canonical schema.
+    - `utils/`: Common utilities (e.g., `cn.ts`).
+    - `components/ui/`: Canonical shadcn/ui components.
 
 ---
 
 ## Development Conventions
 
 ### 1. The Repository Pattern (Strict)
-
 To maintain the Dependency Inversion Principle, **Services must never call `db` directly.**
-
 - **Wrong:** `MateriService` calling `db.select().from(material)...`
 - **Right:** `MateriService` calling `MateriRepository.findPublished()...`
 
 ### 2. Authentication (NIM/NIK Login)
-
 PyLearn uses a custom login flow where users identify themselves via NIM (Student) or NIK (Lecturer).
 
 **Login Flow:**
-
 ```mermaid
 sequenceDiagram
     participant User
@@ -87,7 +80,7 @@ sequenceDiagram
     participant Service as AuthService
     participant DB as Database
     participant BA as Better Auth
-
+    
     User->>Page: Submit (Identifier, Password, Role)
     Page->>Action: execute(loginAction)
     Action->>Service: resolveIdentifier(id, role)
@@ -100,7 +93,6 @@ sequenceDiagram
 ```
 
 ### 3. UI & Styling
-
 - **Shared UI:** Always use components from `@/shared/components/ui/`.
 - **Vanilla CSS:** Preferred for custom styling for maximum flexibility.
 - **Animations:** Use [Framer Motion](https://www.framer.com/motion/).
@@ -119,7 +111,6 @@ sequenceDiagram
 ## Building and Running
 
 Use `bun` for all commands:
-
 - **Dev:** `bun dev`
 - **Lint:** `bun lint`
 - **Test:** `bun test`
