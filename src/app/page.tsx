@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { loginSchema, type LoginInput } from "@/features/auth/backend/validations/auth.validation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
@@ -22,14 +22,6 @@ import { login } from "@/features/auth/backend/actions/auth.action";
 
 type Role = "student" | "lecturer";
 type View = "role-selection" | "login";
-
-const loginSchema = z.object({
-  identifier: z.string().min(1, "NIM/NIK is required"),
-  password: z.string().min(1, "Password is required"),
-  role: z.enum(["student", "lecturer"]),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Home() {
   const [view, setView] = useState<View>("role-selection");
@@ -53,7 +45,7 @@ export default function Home() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
+  } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       role: selectedRole || "student",
@@ -72,7 +64,7 @@ export default function Home() {
     setLoginError(null);
   };
 
-  const onSubmit = (data: LoginFormData) => {
+  const onSubmit = (data: LoginInput) => {
     setLoginError(null);
     loginAction({
       identifier: data.identifier,
