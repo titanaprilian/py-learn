@@ -8,10 +8,16 @@ const env = dotenv.config({
 
 expand(env);
 
+console.log("Connecting to:", process.env.DATABASE_URL);
+
 export default {
   schema: "./src/shared/db/schema.ts",
   out: "./drizzle/migrations",
   dialect: "postgresql",
+  migrations: {
+    table: "__drizzle_migrations",
+    schema: "public",
+  },
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },

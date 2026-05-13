@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1778646756227,
-      "tag": "0000_puzzling_madame_masque",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1778658747022,
-      "tag": "0001_sticky_wolverine",
+      "when": 1778675508714,
+      "tag": "0000_mute_jack_power",
       "breakpoints": true
     }
   ]

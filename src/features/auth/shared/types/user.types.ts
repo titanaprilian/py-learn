@@ -5,10 +5,14 @@ export interface User {
   email: string;
   emailVerified: boolean;
   image?: string | null;
-  role: "Mahasiswa" | "Dosen";
+  roleId: number;
   lastLoginAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UserWithRole extends User {
+  roleName: "Mahasiswa" | "Dosen";
 }
 
 export interface Session {
