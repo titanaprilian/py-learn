@@ -9,7 +9,7 @@ const env = dotenv.config({
 expand(env);
 
 export default {
-  schema: "./src/lib/db/schema.ts",
+  schema: "./src/shared/db/schema.ts",
   out: "./drizzle/migrations",
   dialect: "postgresql",
   dbCredentials: {

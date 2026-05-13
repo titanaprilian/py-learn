@@ -14,11 +14,11 @@ import {
   CardContent,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { login } from "@/lib/actions/auth";
+} from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { login } from "@/features/auth/backend/actions/auth.action";
 
 type Role = "student" | "lecturer";
 type View = "role-selection" | "login";
