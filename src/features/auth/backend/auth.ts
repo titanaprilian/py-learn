@@ -11,4 +11,20 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  user: {
+    additionalFields: {
+      roleId: {
+        type: "number",
+        required: true,
+        defaultValue: 1,
+      },
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+  },
+  trustedOrigins: ["http://localhost:3000"],
 });
+
+export type Session = typeof auth.$Infer.Session.session;

@@ -27,7 +27,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
-  role: varchar("role", { length: 20 }).notNull(),
+  roleId: integer("role_id")
+    .notNull()
+    .references(() => role.id),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
@@ -35,8 +37,8 @@ export const user = pgTable("user", {
 
 export const userRoleRelations = relations(user, ({ one }) => ({
   role: one(role, {
-    fields: [user.role],
-    references: [role.name],
+    fields: [user.roleId],
+    references: [role.id],
   }),
 }));
 
@@ -144,7 +146,7 @@ export const materialLevelRelations = relations(
       references: [material.id],
     }),
     quizzes: many(quiz),
-  })
+  }),
 );
 
 export const quiz = pgTable("quiz", {
@@ -192,7 +194,7 @@ export const quizQuestionRelations = relations(
       references: [quiz.id],
     }),
     questionBlanks: many(questionBlank),
-  })
+  }),
 );
 
 export const questionBlank = pgTable("question_blank", {
@@ -207,12 +209,10 @@ export const questionBlank = pgTable("question_blank", {
   caseSensitive: boolean("case_sensitive").default(false),
 });
 
-export const questionBlankRelations = relations(
-  questionBlank,
-  ({ one }) => ({
-    question: one(quizQuestion, {
-      fields: [questionBlank.questionId],
-      references: [quizQuestion.id],
-    }),
-  })
-);
+export const questionBlankRelations = relations(questionBlank, ({ one }) => ({
+  question: one(quizQuestion, {
+    fields: [questionBlank.questionId],
+    references: [quizQuestion.id],
+  }),
+}));
+

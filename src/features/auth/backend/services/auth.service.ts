@@ -21,7 +21,7 @@ export class AuthService {
       return null;
     }
 
-    if (dbUser.role !== role) {
+    if (dbUser.roleId !== roleRecord.id) {
       return null;
     }
 
@@ -47,10 +47,10 @@ export class AuthService {
       return { error: "Invalid NIM/NIK atau password" };
     }
 
-    console.log(`User found: ${dbUser.email} (Role: ${dbUser.role})`);
+    console.log(`User found: ${dbUser.email} (Role ID: ${dbUser.roleId})`);
 
-    if (dbUser.role !== role) {
-      console.log(`Role mismatch: Expected ${role}, got ${dbUser.role}`);
+    if (dbUser.roleId !== roleRecord.id) {
+      console.log(`Role mismatch: Expected role ID ${roleRecord.id}, got ${dbUser.roleId}`);
       return {
         error: `Akun ini bukan sebagai ${
           role === "Mahasiswa" ? "Mahasiswa" : "Dosen"
@@ -66,21 +66,12 @@ export class AuthService {
       },
     });
 
-    if (!signInResult || !signInResult.token) {
-      console.log("signInEmail failed: Invalid credentials or token missing");
+    if (!signInResult || !signInResult.user) {
+      console.log("signInEmail failed: Invalid credentials or user missing");
       return { error: "Invalid NIM/NIK atau password" };
     }
 
-    const sessionHeaders = await headers();
-    const session = await auth.api.getSession({
-      headers: sessionHeaders,
-    });
-
-    if (!session) {
-      return { error: "Failed to create session" };
-    }
-
-    return { success: true, user: session.user };
+    return { success: true, user: signInResult.user };
   }
 
   static async logout() {
