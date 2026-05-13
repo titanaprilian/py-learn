@@ -101,8 +101,8 @@ sequenceDiagram
 
 ### 3. UI & Styling
 
-- **Shared UI:** Always use components from `@/shared/components/ui/`.
-- **Vanilla CSS:** Preferred for custom styling for maximum flexibility.
+- **Shared UI:** Always use components from `@/shared/components/ui/` (shadcn/ui).
+- **Tailwind CSS:** Use Tailwind CSS v4 utility classes for all styling and layout needs.
 - **Animations:** Use [Framer Motion](https://www.framer.com/motion/).
 
 ---
