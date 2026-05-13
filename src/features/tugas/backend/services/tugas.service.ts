@@ -1,28 +1,15 @@
-import { db } from "@/shared/db";
-import { quiz } from "@/shared/db/schema";
-import { eq } from "drizzle-orm";
+import { TugasRepository } from "@/features/tugas/backend/repositories/tugas.repository";
 
 export class TugasService {
   static async getAllPublished() {
-    return db
-      .select()
-      .from(quiz)
-      .where(eq(quiz.isPublished, true));
+    return TugasRepository.findPublished();
   }
 
   static async getById(id: number) {
-    const results = await db
-      .select()
-      .from(quiz)
-      .where(eq(quiz.id, id))
-      .limit(1);
-    return results[0] ?? null;
+    return TugasRepository.findById(id);
   }
 
   static async getByMaterialLevelId(materialLevelId: number) {
-    return db
-      .select()
-      .from(quiz)
-      .where(eq(quiz.materialLevelId, materialLevelId));
+    return TugasRepository.findByMaterialLevelId(materialLevelId);
   }
 }
