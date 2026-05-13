@@ -1,4 +1,4 @@
-# Refactor User Table: Replace String Role with Role ID
+# Fix Post-Login Session Cookies and Last Login Timestamp
 
 > **For the implementer:** This issue is self-contained. Read it fully before starting. If anything is unclear, re-read the Notes section before asking.
 
@@ -6,64 +6,54 @@
 
 ## Overview
 
-Currently, the `user` table stores the user's role as a string (`varchar`) in the `role` column, which is manually kept in sync with the `role` table's `name` column. This lacks database-level integrity. We need to refactor the `user` table to use a `role_id` column that properly references the `role` table's primary key (`id`).
+After a successful login via our Server Action, the session is created in the database, but the session cookie is not being set in the user's browser. This happens because `auth.api.signInEmail` is called without the proper Next.js request context to handle `Set-Cookie` headers automatically. Additionally, our custom `last_login_at` field in the `user` table is not being updated upon a successful login.
 
 ---
 
 ## Scope
 
-This affects the database schema in `src/shared/db/schema.ts`, database migrations, and all backend/frontend logic that relies on the `user.role` field.
+This issue affects the login logic in `src/features/auth/backend/services/auth.service.ts` and the data access logic in `src/features/auth/backend/repositories/auth.repository.ts`.
 
 ---
 
 ## Tasks
 
-1. **Schema Update:**
-    - Modify `src/shared/db/schema.ts`:
-        - Rename `role` column in the `user` table to `role_id`.
-        - Change its type from `varchar` to `integer`.
-        - Add a foreign key reference: `.references(() => role.id)`.
-    - Update `userRoleRelations` to use `user.roleId` and `role.id`.
-2. **Migration:**
-    - Generate a new migration using `bun db:generate`.
-    - **Note:** Since this is a breaking change, existing data (if any) might need a manual migration script or be cleared if in development.
-3. **Repository/Service Updates:**
-    - Update `AuthRepository` and `AuthService` to handle `role_id` instead of `role`.
-    - **Crucial:** Since we often need the role *name* (e.g., "Mahasiswa", "Dosen") for logic, ensure that queries joining the `role` table are used where necessary, or update the logic to compare IDs.
-4. **Auth Logic Updates:**
-    - Update `AuthService.resolveIdentifier` and `AuthService.login` to use the role relationship or compare against the `role_id`.
-    - Update `role.middleware.ts` to check `user.roleId`.
-5. **Seeding:**
-    - Update `src/shared/db/seed.ts` to include a seeder for the `user` table.
-    - Create 10 "Mahasiswa" accounts and 5 "Dosen" accounts with predictable passwords for testing.
-    - Ensure passwords are hashed correctly (Better Auth uses bcrypt or similar, but for seeding you might need to use the auth API or a compatible hashing lib).
-6. **Frontend/Type Updates:**
-    - Update `UserDTO` in `src/features/auth/shared/types/user.types.ts` (if it exists) to reflect the change.
-    - Update `useAuth` hook and any components using `user.role`.
+1. **Update `last_login_at`:**
+    - Modify `src/features/auth/backend/repositories/auth.repository.ts` to include a method (e.g., `updateLastLogin`) that updates the `lastLoginAt` column for a given user ID to the current timestamp.
+2. **Fix Session Cookie & Login Flow:**
+    - Modify `src/features/auth/backend/services/auth.service.ts` in the `login` method.
+    - Change the `auth.api.signInEmail` call to properly pass the Next.js `headers()` context. E.g., `auth.api.signInEmail({ body: ... }, { headers: await headers() })`.
+    - If Better Auth does not automatically set the cookie in a Server Action context even with headers provided, perform the API call with `asResponse: true`, extract the `Set-Cookie` header from the resulting Response object, and manually apply it using the Next.js `cookies()` API.
+3. **Execute Timestamp Update:**
+    - Upon a successful sign-in (after the cookie is verified to be set), call the repository method to update the user's `last_login_at`.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] The `user` table in the database has a `role_id` column of type `integer`.
-- [ ] The `role_id` column has a foreign key constraint referencing `role.id`.
-- [ ] Login functionality still works correctly for both "Mahasiswa" and "Dosen".
-- [ ] 10 Mahasiswa and 5 Dosen accounts are successfully seeded into the database.
-- [ ] `AuthService` correctly validates that a user has the selected role during login.
-- [ ] All TypeScript errors related to `user.role` are resolved.
-- [ ] The project builds successfully with `bun run build`.
+- [ ] When a user logs in, a valid session cookie (e.g., `better-auth.session_token`) is set in the browser.
+- [ ] The user is successfully redirected to the dashboard (or stays logged in) because the session persists across requests.
+- [ ] The `last_login_at` column in the `user` table is updated to the current time immediately after a successful login.
+- [ ] The `access_token` in the `account` table remains `null` (this is expected behavior for the credential provider and should not be altered).
 
 ---
 
 ## Out of Scope
 
-- Adding new roles.
-- Changing the `Better Auth` configuration beyond what is necessary to support the schema change.
+- Modifying the frontend login component or form logic.
+- Implementing OAuth providers (Google, GitHub, etc.).
 
 ---
 
 ## Notes
 
-- You may need to update the `betterAuth` adapter configuration if it explicitly maps the `role` field.
-- Check `AuthRepository.findByIdentifier` to see if it needs to `.leftJoin` the `role` table to provide the role name to the service layer.
-- Existing `ROLES` constants in `src/features/auth/shared/constants/roles.ts` are strings ("Mahasiswa", "Dosen"). You might need to fetch the IDs from the database or map them.
+- To set cookies manually if needed:
+  ```typescript
+  import { cookies } from "next/headers";
+  // ...
+  const res = await auth.api.signInEmail({ body: ..., asResponse: true });
+  const setCookieHeader = res.headers.get("Set-Cookie");
+  if (setCookieHeader) {
+      // Parse the cookie string and use cookies().set(name, value, options)
+  }
+  ```
