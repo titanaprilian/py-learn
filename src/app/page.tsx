@@ -5,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { GraduationCap, ArrowLeft, Eye, EyeOff, User, Lock } from "lucide-react";
 import {
   Card,
@@ -16,13 +18,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/lib/actions/auth";
 
 type Role = "student" | "lecturer";
 type View = "role-selection" | "login";
 
 const loginSchema = z.object({
-  identifier: z.string().min(5, "Must be at least 5 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  identifier: z.string().min(1, "NIM/NIK is required"),
+  password: z.string().min(1, "Password is required"),
+  role: z.enum(["student", "lecturer"]),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -31,6 +35,19 @@ export default function Home() {
   const [view, setView] = useState<View>("role-selection");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const { execute: loginAction, isPending: isLoggingIn } = useAction(login, {
+    onSuccess: (result) => {
+      const data = result.data;
+      if (data?.error) {
+        setLoginError(data.error);
+      } else if (data?.success) {
+        router.push("/dashboard");
+      }
+    },
+  });
 
   const {
     register,
@@ -38,20 +55,30 @@ export default function Home() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      role: selectedRole || "student",
+    },
   });
 
   const handleRoleSelect = (role: Role) => {
     setSelectedRole(role);
     setView("login");
+    setLoginError(null);
   };
 
   const handleBack = () => {
     setView("role-selection");
     setSelectedRole(null);
+    setLoginError(null);
   };
 
   const onSubmit = (data: LoginFormData) => {
-    console.log("Login submitted:", data, "Role:", selectedRole);
+    setLoginError(null);
+    loginAction({
+      identifier: data.identifier,
+      password: data.password,
+      role: data.role,
+    });
   };
 
   const roleTitle = selectedRole === "student" ? "Mahasiswa" : "Dosen";
@@ -169,10 +196,22 @@ export default function Home() {
                       Login sebagai {roleTitle}
                     </CardTitle>
 
+                    {loginError && (
+                      <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                        {loginError}
+                      </div>
+                    )}
+
                     <form
                       onSubmit={handleSubmit(onSubmit)}
                       className="space-y-4"
                     >
+                      <input
+                        type="hidden"
+                        {...register("role")}
+                        value={selectedRole || "student"}
+                      />
+
                       <div className="space-y-2">
                         <Label
                           htmlFor="identifier"
@@ -234,9 +273,10 @@ export default function Home() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-[#142175] hover:bg-[#142175]/90 cursor-pointer"
+                        disabled={isLoggingIn}
+                        className="w-full bg-[#142175] hover:bg-[#142175]/90 cursor-pointer disabled:opacity-50"
                       >
-                        Masuk
+                        {isLoggingIn ? "Memasuki..." : "Masuk"}
                       </Button>
                     </form>
 
