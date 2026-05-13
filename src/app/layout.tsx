@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { QueryProvider } from "@/providers/query-provider";
+import { QueryProvider } from "@/features/auth/frontend/providers/query-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
