@@ -5,7 +5,7 @@ export interface User {
   email: string;
   emailVerified: boolean;
   image?: string | null;
-  role: "student" | "lecturer";
+  role: "Mahasiswa" | "Dosen";
   lastLoginAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -26,5 +26,6 @@ export interface UserDTO {
   id: string;
   name: string;
   email: string;
-  role: "student" | "lecturer";
+  role: "Mahasiswa" | "Dosen";
 }
+

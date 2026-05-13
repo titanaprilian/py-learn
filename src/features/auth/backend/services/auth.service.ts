@@ -3,14 +3,12 @@ import { AuthRepository } from "@/features/auth/backend/repositories/auth.reposi
 import { RoleRepository } from "@/features/auth/backend/repositories/role.repository";
 import { headers } from "next/headers";
 
-export type AuthResult =
-  | { success: true; user: unknown }
-  | { error: string };
+export type AuthResult = { success: true; user: unknown } | { error: string };
 
 export class AuthService {
   static async resolveIdentifier(
     identifier: string,
-    role: "student" | "lecturer"
+    role: "Mahasiswa" | "Dosen",
   ) {
     const dbUser = await AuthRepository.findByIdentifier(identifier);
 
@@ -33,7 +31,7 @@ export class AuthService {
   static async login(
     identifier: string,
     password: string,
-    role: "student" | "lecturer"
+    role: "Mahasiswa" | "Dosen",
   ): Promise<AuthResult> {
     const roleRecord = await RoleRepository.findByName(role);
     if (!roleRecord) {
@@ -44,7 +42,7 @@ export class AuthService {
 
     if (!dbUser) {
       console.log(
-        `Login attempt failed: User with identifier "${identifier}" not found in database.`
+        `Login attempt failed: User with identifier "${identifier}" not found in database.`,
       );
       return { error: "Invalid NIM/NIK atau password" };
     }
@@ -55,7 +53,7 @@ export class AuthService {
       console.log(`Role mismatch: Expected ${role}, got ${dbUser.role}`);
       return {
         error: `Akun ini bukan sebagai ${
-          role === "student" ? "Mahasiswa" : "Dosen"
+          role === "Mahasiswa" ? "Mahasiswa" : "Dosen"
         }. Silakan pilih peran yang sesuai.`,
       };
     }
@@ -92,3 +90,4 @@ export class AuthService {
     });
   }
 }
+
