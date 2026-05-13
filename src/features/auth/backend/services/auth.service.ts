@@ -1,28 +1,15 @@
-import { db } from "@/shared/db";
-import { user } from "@/shared/db/schema";
-import { eq, or } from "drizzle-orm";
+import { AuthRepository } from "@/features/auth/backend/repositories/auth.repository";
 
 export class AuthService {
   static async resolveIdentifier(
     identifier: string,
     role: "student" | "lecturer"
   ) {
-    const dbUsers = await db
-      .select()
-      .from(user)
-      .where(
-        or(
-          eq(user.userId, identifier),
-          eq(user.email, identifier)
-        )
-      )
-      .limit(1);
+    const dbUser = await AuthRepository.findByIdentifier(identifier);
 
-    if (dbUsers.length === 0) {
+    if (!dbUser) {
       return null;
     }
-
-    const dbUser = dbUsers[0];
 
     const expectedRole = role === "student" ? "student" : "lecturer";
     if (dbUser.role !== expectedRole) {
