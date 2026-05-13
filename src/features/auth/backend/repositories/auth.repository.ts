@@ -85,4 +85,13 @@ export class AuthRepository {
   static async delete(id: string) {
     return db.delete(user).where(eq(user.id, id));
   }
+
+  // New method to update the last login timestamp
+  static async updateLastLogin(userId: string) {
+    return db
+      .update(user)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(user.id, userId))
+      .returning();
+  }
 }
