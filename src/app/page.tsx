@@ -33,9 +33,9 @@ export default function Home() {
   const { execute: loginAction, isPending: isLoggingIn } = useAction(login, {
     onSuccess: (result) => {
       const data = result.data;
-      if (data?.error) {
+      if (data && "error" in data) {
         setLoginError(data.error);
-      } else if (data?.success) {
+      } else if (data && "success" in data) {
         router.push("/dashboard");
       }
     },
