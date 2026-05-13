@@ -12,8 +12,8 @@ export const login = action
     const { identifier, password, role } = parsedInput;
 
     try {
-      const { db } = await import("@/lib/db");
-      const { user: userTable } = await import("@/lib/db/schema");
+      const { db } = await import("@/shared/db");
+      const { user: userTable } = await import("@/shared/db/schema");
       const { eq, or } = await import("drizzle-orm");
 
       // Find user by NIM/NIK (userId) or email
